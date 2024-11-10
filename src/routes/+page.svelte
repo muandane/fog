@@ -2,7 +2,6 @@
 import { onMount } from "svelte";
 import type { ItemCard, OmenCard, BaseCard } from "$lib/types";
 import Icon from "@iconify/svelte";
-
 // biome-ignore lint/style/useConst: needs to be like this
 let searchQuery = "";
 let cards: (ItemCard | OmenCard)[] = [];
@@ -11,77 +10,71 @@ let showTypeMenu = false;
 let error: string | null = null;
 let showModal = false;
 let selectedCard: (ItemCard | OmenCard) | null = null;
-
 const types = ["all", "item", "omen"] as const;
 type CardType = (typeof types)[number];
 let selectedType: CardType = "all";
-
+onMount(() => {
+	fetchCards();
+	window.addEventListener("keydown", handleKeydown);
+	return () => {
+		window.removeEventListener("keydown", handleKeydown);
+	};
+});
 async function fetchCards() {
-    loading = true;
-    error = null;
-    try {
-        const url = new URL('/api/cards', window.location.origin);
-        if (selectedType !== 'all') {
-            url.searchParams.set('type', selectedType);
-        }
-        if (searchQuery) {
-            url.searchParams.set('q', searchQuery);
-        }
-        
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        cards = await response.json();
-    } catch (err) {
-        console.error("Error fetching cards:", err);
-        error = err instanceof Error ? err.message : 'Failed to fetch cards';
-    } finally {
-        loading = false;
-    }
+	loading = true;
+	error = null;
+	try {
+		// biome-ignore lint/style/useConst: <explanation>
+		let url = new URL(
+			"/api/cards",
+			import.meta.env.VITE_APP_BASE_URL || "http://localhost:5173",
+		);
+		if (selectedType !== "all") {
+			url.searchParams.append("type", selectedType);
+		}
+		if (searchQuery) {
+			url.searchParams.append("q", searchQuery);
+		}
+		const response = await fetch(url.toString());
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		cards = await response.json();
+	} catch (err) {
+		console.error("Error fetching cards:", err);
+		error = err instanceof Error ? err.message : "Failed to fetch cards";
+	} finally {
+		loading = false;
+	}
 }
-
 function setType(type: CardType) {
-    selectedType = type;
-    showTypeMenu = false;
-    fetchCards();
+	selectedType = type;
+	showTypeMenu = false;
+	fetchCards();
 }
-
 function openCardModal(card: ItemCard | OmenCard) {
-    selectedCard = card;
-    showModal = true;
+	selectedCard = card;
+	showModal = true;
 }
-
 function closeModal() {
-    showModal = false;
-    selectedCard = null;
+	showModal = false;
+	selectedCard = null;
 }
-
 // Improved search with debouncing
 let searchTimeout: NodeJS.Timeout;
 $: {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        fetchCards();
-    }, 300);
+	clearTimeout(searchTimeout);
+	searchTimeout = setTimeout(() => {
+		fetchCards();
+	}, 300);
 }
-
 // Close modal on escape key
 function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && showModal) {
-        closeModal();
-    }
+	if (event.key === "Escape" && showModal) {
+		closeModal();
+	}
 }
-
-onMount(() => {
-    fetchCards();
-    window.addEventListener('keydown', handleKeydown);
-    return () => {
-        window.removeEventListener('keydown', handleKeydown);
-    };
-});
 </script>
-
 <div class="container mx-auto py-8 px-4">
     <div class="flex flex-col sm:flex-row gap-4 mb-8">
         <!-- Search Input -->
@@ -107,7 +100,6 @@ onMount(() => {
                 {/if}
             </div>
         </div>
-
         <!-- Type Filter -->
         <div class="relative">
             <button
@@ -117,7 +109,6 @@ onMount(() => {
                 <Icon icon="lucide:filter" class="h-4 w-4" />
                 <span>Type: {selectedType}</span>
             </button>
-            
             {#if showTypeMenu}
                 <div class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
                     {#each types as type}
@@ -132,13 +123,11 @@ onMount(() => {
             {/if}
         </div>
     </div>
-
     {#if error}
         <div class="text-red-500 p-4 rounded-md bg-red-50 mb-4">
             Error: {error}
         </div>
     {/if}
-
     {#if loading}
         <div class="text-center py-8">Loading...</div>
     {:else if cards.length === 0}
@@ -193,9 +182,6 @@ onMount(() => {
         </div>
     {/if}
 </div>
-
-<!-- Modal -->
-<!-- Modal -->
 {#if showModal && selectedCard}
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
@@ -206,7 +192,6 @@ onMount(() => {
                     class="w-10 h-10 text-gray-800"
                 />
             </div>
-            
             <!-- Header -->
             <div class="border-b p-4 pl-16">
                 <div class="flex justify-between items-center">
@@ -219,7 +204,6 @@ onMount(() => {
                     </button>
                 </div>
             </div>
-            
             <div class="p-6">
                 <div class="mb-6">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium {
@@ -230,7 +214,6 @@ onMount(() => {
                         {'hauntRoll' in selectedCard ? 'Omen' : 'Item'}
                     </span>
                 </div>
-
                 <div class="space-y-4">
                     {#each selectedCard.effects as effect}
                         <div class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
@@ -243,7 +226,6 @@ onMount(() => {
                             {/if}
                         </div>
                     {/each}
-
                     {#if 'diceRange' in selectedCard && selectedCard.diceRange}
                         <div class="mt-4 border-t pt-4">
                             <div class="flex items-center gap-2 text-gray-600">
@@ -259,7 +241,6 @@ onMount(() => {
                     {/if}
                 </div>
             </div>
-
             <div class="border-t p-4 bg-gray-50 flex justify-end">
                 <button
                     on:click={closeModal}
