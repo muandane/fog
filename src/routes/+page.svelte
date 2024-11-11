@@ -160,11 +160,8 @@ function handleKeydown(event: KeyboardEvent) {
                                 </div>
                             </td>
                             <td class="p-4">
-                                <span class="px-2 py-1 rounded-full text-sm {
-                                    'hauntRoll' in card 
-                                        ? 'bg-emerald-100 text-green-600' 
-                                        : 'bg-orange-100 text-amber-600'
-                                }">
+                                <span class={`px-2 py-1 rounded-full text-sm flex items-center gap-1 ${'hauntRoll' in card ? 'bg-emerald-100 text-green-600' : 'bg-orange-100 text-amber-600'}`}>
+                                    <Icon icon={'hauntRoll' in card ? 'fa6-solid:crow' : 'game-icons:desert-skull'} class="w-4 h-4" />
                                     {'hauntRoll' in card ? 'Omen' : 'Item'}
                                 </span>
                             </td>
