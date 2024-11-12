@@ -24,10 +24,11 @@ async function fetchCards() {
 	loading = true;
 	error = null;
 	try {
+        console.log(window.location.pathname);
 		// biome-ignore lint/style/useConst: <explanation>
 		let url = new URL(
 			"/api/cards",
-			import.meta.env.VITE_APP_BASE_URL || "http://localhost:5173",
+			import.meta.env.BASE_URL || "http://localhost:5173",
 		);
 		if (selectedType !== "all") {
 			url.searchParams.append("type", selectedType);
