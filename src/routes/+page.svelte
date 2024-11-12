@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 import type { ItemCard, OmenCard, BaseCard } from "$lib/types";
 import Icon from "@iconify/svelte";
+import assets from "$app/paths";
 // biome-ignore lint/style/useConst: needs to be like this
 let searchQuery = "";
 let cards: (ItemCard | OmenCard)[] = [];
@@ -24,11 +25,10 @@ async function fetchCards() {
 	loading = true;
 	error = null;
 	try {
-        console.log(window.location.pathname);
 		// biome-ignore lint/style/useConst: <explanation>
 		let url = new URL(
 			"/api/cards",
-			import.meta.env.BASE_URL || "http://localhost:5173",
+			"https://fog-3rg.pages.dev" || "http://localhost:5173",
 		);
 		if (selectedType !== "all") {
 			url.searchParams.append("type", selectedType);
